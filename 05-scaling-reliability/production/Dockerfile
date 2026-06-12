@@ -1,5 +1,5 @@
 # ============================================================
-# Production Dockerfile — Multi-stage, < 500 MB, non-root
+# Production Dockerfile for Scaling & Reliability Part 5
 # ============================================================
 
 # Stage 1: Builder
@@ -10,24 +10,23 @@ WORKDIR /build
 RUN apt-get update && apt-get install -y gcc libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY 05-scaling-reliability/production/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
-
 
 # Stage 2: Runtime
 FROM python:3.11-slim AS runtime
 
-# Non-root user
+# Create agent user with home directory /app
 RUN groupadd -r agent && useradd -r -g agent -d /app agent
 
 WORKDIR /app
 
-# Copy packages từ builder
+# Copy installed dependencies directly to /app/.local
 COPY --from=builder /root/.local /app/.local
 
-# Copy application
-COPY app/ ./app/
-COPY utils/ ./utils/
+# Copy application source code and mock LLM helper
+COPY 05-scaling-reliability/production/app.py ./app.py
+COPY 05-scaling-reliability/production/utils/ ./utils/
 
 RUN chown -R agent:agent /app
 
@@ -46,4 +45,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" \
     || exit 1
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

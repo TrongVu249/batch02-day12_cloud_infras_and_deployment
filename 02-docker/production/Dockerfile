@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
 # Copy và cài requirements
 # Dùng --user để install vào /root/.local (dễ copy sang stage 2)
 COPY 02-docker/production/requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --timeout 120 --retries 10 --no-cache-dir --user -r requirements.txt
 
 
 # ──────────────────────────────────────────────────────────
