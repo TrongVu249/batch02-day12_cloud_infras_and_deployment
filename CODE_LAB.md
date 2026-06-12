@@ -87,9 +87,7 @@ python app.py
 
 Test:
 ```bash
-curl http://localhost:8000/ask -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Hello"}'
+curl -X POST "http://localhost:8000/ask?question=hello"
 ```
 
 **Quan sát:** Nó chạy! Nhưng có production-ready không?
@@ -928,5 +926,11 @@ A: Dùng volume: `volumes: - redis-data:/data` trong docker-compose.
 A: Railway: `railway scale <replicas>`. Render: Dashboard → Settings → Instances.
 
 ---
+
+## Bonus Point Exercise
+1. Tạo 1 CICD pipeline bằng github actions để deploy app của bạn lên Railway / Render
+-  CI: có stage verify code lint, unitest coverage
+-  CD
+-  Demo để cộng điểm
 
 **Happy Deploying! **
